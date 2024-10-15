@@ -36,7 +36,7 @@ export default function Home(){
                 RhinoMeet is an innovative video chat application designed to connect users from all around the world for spontaneous and engaging conversations. Built with a focus on ease of use and seamless interaction, RhinoMeet allows users to effortlessly start video calls, share screens, and exchange messages in real-time. Whether you're seeking to meet new people, collaborate on projects, or simply enjoy face-to-face interactions, RhinoMeet delivers a smooth experience with user-friendly features. It prioritizes privacy, utilizing encrypted connections to ensure that all communications are secure. The platform's sleek and modern design, combined with features like quick user pairing, screen sharing, and integrated messaging, makes RhinoMeet a go-to choice for both casual and professional video chatting.
                 </div>
                 <div className="flex gap-2 items-center font-bold text-xl max-lg:flex-col font-serif">Any contribution to the community is highly appreciated. 
-                    <a href="https://github.com/Shobhit2205/RhinoTalk/" target="_blank" rel="noopener noreferrer"
+                    <a href="https://github.com/Shobhit2205/RhinoMeet" target="_blank" rel="noopener noreferrer"
                     >
                         <Button className="flex gap-2 font-bold tracking-widest" ><Github size={18}/>Github</Button>
                     </a>
