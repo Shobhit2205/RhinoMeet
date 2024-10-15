@@ -7,7 +7,7 @@ class PeerService {
 
     initPeer() {
         // Reinitialize peer connection
-        console.log("init peer........")
+        // console.log("init peer........")
         if (this.peer && this.peer.signalingState !== 'closed') {
             this.peer.getTransceivers().forEach(transceiver => {
                 if (transceiver && transceiver.stop) {

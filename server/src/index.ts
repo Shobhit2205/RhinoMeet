@@ -57,42 +57,42 @@ io.on('connection', (socket) => {
     // })
 
     socket.on("offer", ({offer, to}) => {
-        console.log(`Recieved Offer from ${socket.id} to ${to}`);
+        // console.log(`Recieved Offer from ${socket.id} to ${to}`);
         io.to(to).emit("offer", {offer, from: socket.id});
     });
 
     socket.on("answer", ({answer, to}) => {
-        console.log(`Recieved answer from ${socket.id} to ${to}`);
+        // console.log(`Recieved answer from ${socket.id} to ${to}`);
         io.to(to).emit("answer", {answer, from: socket.id});
     })
 
     socket.on("peer:nego:needed", ({offer, to}) => {
-        console.log("nego needed")
+        // console.log("nego needed")
         io.to(to).emit("peer:nego:needed", { offer, from: socket.id });
     });
 
     socket.on("peer:nego:done", ({answer, to}) => {
-        console.log("nego done")
+        // console.log("nego done")
         io.to(to).emit("peer:nego:final", {answer, to: socket.id});
     });
 
     socket.on('ice-candidate', ({ candidate, to }) => {
-        console.log(`Relaying ICE candidate to ${to}`);
+        // console.log(`Relaying ICE candidate to ${to}`);
         io.to(to).emit('ice-candidate', { candidate });
     });
 
     socket.on("send:message", ({message, to}) => {
-        console.log(message, to);
+        // console.log(message, to);
         io.to(to).emit("message:recieved", {message, from: socket.id});
     });
 
     socket.on("skip", () => {
-        console.log(`${socket.id} skipped the current pair`);
+        // console.log(`${socket.id} skipped the current pair`);
         
         
         const partnerId = userPairs[socket.id];
-        console.log(partnerId);
-        console.log(socket.id);
+        // console.log(partnerId);
+        // console.log(socket.id);
         if (partnerId) {
             io.to(partnerId).emit("skipped");
             delete userPairs[socket.id];
@@ -107,11 +107,11 @@ io.on('connection', (socket) => {
     });
 
     socket.on("disconnect", () => {
-        console.log(`User disconnected ${socket.id}`);
+        // console.log(`User disconnected ${socket.id}`);
 
         const partnerId = userPairs[socket.id];
-        console.log(partnerId);
-        console.log(socket.id);
+        // console.log(partnerId);
+        // console.log(socket.id);
         if(partnerId){
             io.to(partnerId).emit("partnerDisconnected");
             delete userPairs[socket.id];
@@ -127,7 +127,7 @@ io.on('connection', (socket) => {
 })
 
 app.get('/', (req, res) => {
-    console.log(`Server is running...`);
+    // console.log(`Server is running...`);
     res.send("Server is running...")
 })
 

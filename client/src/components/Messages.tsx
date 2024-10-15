@@ -42,10 +42,10 @@ export default function Messages({remoteSocketId, messagesArray, setMessagesArra
         }
     };
 
-    const handleMessageRecieved = useCallback(({message, from}: RecievedMessageProps) => {
-        console.log("Message Recieved : ", message);
+    const handleMessageRecieved = useCallback(({message}: RecievedMessageProps) => {
+        // console.log("Message Recieved : ", message);
         setMessagesArray((prev) => [...prev, {sender: 'Stranger', message}])
-        console.log(from);
+        // console.log(from);
     }, [setMessagesArray]);
 
     useEffect(() => {

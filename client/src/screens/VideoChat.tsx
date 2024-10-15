@@ -4,9 +4,10 @@ import peerservice from "../service/peer";
 import ReactPlayer from "react-player";
 import { Button } from "../components/ui/button";
 import Messages from "../components/Messages";
-import { ScreenShare, StepForward } from "lucide-react";
+import { ScreenShare, StepBack, StepForward } from "lucide-react";
 import { ClipLoader } from "react-spinners"; // Import the spinner
 import { useTheme } from "../components/theme-provider";
+import { useNavigate } from "react-router-dom";
 
 interface Offer {
   offer: RTCSessionDescriptionInit;
@@ -33,18 +34,27 @@ export default function VideoChat() {
   const [messagesArray, setMessagesArray] = useState<
     Array<{ sender: string; message: string }>
   >([]);
+  const [isScreenSharing, setIsScreenSharing] = useState(false);
 
   const theme = useTheme();
+  const navigate = useNavigate();
 
   const loaderColor = theme.theme === "dark" ? "#D1D5DB" : "#4B5563";
-
-  const [isScreenSharing, setIsScreenSharing] = useState(false);
+  
 
   const getUserStream = useCallback(async () => {
     const stream = await navigator.mediaDevices.getUserMedia({
       video: true,
-      audio: true,
+      audio: {
+        echoCancellation: true,  
+        noiseSuppression: true,  
+        autoGainControl: true, 
+        sampleRate: 48000, // CD-quality audio sample rate
+        sampleSize: 16,    // Higher sample size
+        channelCount: 2    // Stereo audio
+      }
     });
+    // const processedStream = processAudio(stream);
     setMyStream(stream);
   }, []);
 
@@ -54,7 +64,7 @@ export default function VideoChat() {
 
   const sendStream = useCallback(() => {
     if (myStream) {
-      console.log("send Stream");
+      // console.log("send Stream");
       const videoTrack = myStream.getVideoTracks()[0];
       const audioTrack = myStream.getAudioTracks()[0];
 
@@ -77,7 +87,7 @@ export default function VideoChat() {
   }, [myStream]);
 
 
-const handleScreenShare = useCallback(async () => {
+  const handleScreenShare = useCallback(async () => {
     if (isScreenSharing) {
        
         const videoTrack = myStream?.getVideoTracks()[0]; 
@@ -123,9 +133,19 @@ const handleScreenShare = useCallback(async () => {
             console.error("Error sharing screen:", error);
         }
     }
-}, [isScreenSharing, myStream, screenStream, remoteSocketId, socket]);
+  }, [isScreenSharing, myStream, screenStream, remoteSocketId, socket]);
 
-
+  const setAudioBandwidth = (peerConnection: RTCPeerConnection) => {
+    const sender = peerConnection.getSenders().find(s => s.track && s.track.kind === 'audio');
+    if (sender) {
+      const parameters = sender.getParameters();
+      parameters.encodings[0] = {
+        maxBitrate: 128000, // Set a high bitrate for audio, 128 kbps
+      };
+      sender.setParameters(parameters);
+    }
+  };
+  
 
   const handleUserJoined = useCallback(
     async (remoteId: string) => {
@@ -133,7 +153,7 @@ const handleScreenShare = useCallback(async () => {
       const offer = await peerservice.getOffer();
 
       socket?.emit("offer", { offer, to: remoteId });
-      console.log("user joined");
+      // console.log("user joined");
     },
     [socket]
   );
@@ -145,8 +165,9 @@ const handleScreenShare = useCallback(async () => {
 
       if (peerservice.peer.signalingState === "stable") {
         const answer = await peerservice.getAnswer(offer);
+        setAudioBandwidth(peerservice.peer);
         socket?.emit("answer", { answer, to: from });
-        console.log("Answer created and sent");
+        // console.log("Answer created and sent");
         sendStream();
       } else {
         console.warn(
@@ -163,7 +184,7 @@ const handleScreenShare = useCallback(async () => {
       if (peerservice.peer.signalingState === "have-local-offer") {
         await peerservice.setRemoteDescription(answer);
         sendStream();
-        console.log("get Answer");
+        // console.log("get Answer");
       } else {
         console.warn("Peer not in a proper state to set remote description.");
       }
@@ -171,19 +192,54 @@ const handleScreenShare = useCallback(async () => {
     [sendStream]
   );
 
+  const modifySDP = (sdp: string) => {
+    return sdp.replace(
+      /a=fmtp:111 .*opus.*/,
+      "a=fmtp:111 maxplaybackrate=48000;stereo=1;sprop-stereo=1;maxaveragebitrate=510000;useinbandfec=1"
+    );
+  };
+  
   const handleNegotiationNeeded = useCallback(async () => {
-
     if (peerservice.peer.signalingState === "stable") {
       const currentOffer = await peerservice.getOffer();
-      socket?.emit("peer:nego:needed", {
-        offer: currentOffer,
-        to: remoteSocketId,
-      });
-      console.log("Negotiation initiated.");
+      
+  
+      if (currentOffer && currentOffer.sdp) {
+        const modifiedSDP = modifySDP(currentOffer.sdp);
+        
+        // Create a new RTCSessionDescription with the modified SDP
+        const modifiedOffer = new RTCSessionDescription({
+          type: currentOffer.type,
+          sdp: modifiedSDP
+        });
+
+        setAudioBandwidth(peerservice.peer);
+  
+        socket?.emit("peer:nego:needed", {
+          offer: modifiedOffer,
+          to: remoteSocketId,
+        });
+  
+        // console.log("Negotiation initiated with modified SDP.");
+      }
     } else {
       console.warn("Peer is not in a stable state for negotiation.");
     }
   }, [remoteSocketId, socket]);
+
+  // const handleNegotiationNeeded = useCallback(async () => {
+
+  //   if (peerservice.peer.signalingState === "stable") {
+  //     const currentOffer = await peerservice.getOffer();
+  //     socket?.emit("peer:nego:needed", {
+  //       offer: currentOffer,
+  //       to: remoteSocketId,
+  //     });
+  //     console.log("Negotiation initiated.");
+  //   } else {
+  //     console.warn("Peer is not in a stable state for negotiation.");
+  //   }
+  // }, [remoteSocketId, socket]);
 
   const handleNegotiationIncomming = useCallback(
     async ({ offer, from }: Offer) => {
@@ -199,7 +255,7 @@ const handleScreenShare = useCallback(async () => {
           peerservice.peer.signalingState
         );
       }
-      console.log("nego:incomming");
+      // console.log("nego:incomming");
     },
     [socket]
   );
@@ -212,7 +268,7 @@ const handleScreenShare = useCallback(async () => {
       ) {
         await peerservice.setRemoteDescription(answer);
         sendStream();
-        console.log("Final negotiation step completed.");
+        // console.log("Final negotiation step completed.");
       } else if (peerservice.peer.signalingState === "stable") {
         console.log("Connection is stable, no need for further negotiation.");
       } else {
@@ -226,7 +282,7 @@ const handleScreenShare = useCallback(async () => {
   );
 
   const handleSkip = useCallback(async () => {
-    console.log("Skipping current user");
+    // console.log("Skipping current user");
 
     peerservice.peer.getTransceivers().forEach((transceiver) => {
       if (transceiver.stop) {
@@ -246,7 +302,7 @@ const handleScreenShare = useCallback(async () => {
     peerservice.peer.onnegotiationneeded = null;
 
     if (peerservice.peer.signalingState !== "closed") {
-      console.log("closed");
+      // console.log("closed");
       peerservice.peer.close();
     }
     peerservice.initPeer();
@@ -273,7 +329,7 @@ const handleScreenShare = useCallback(async () => {
   useEffect(() => {
     const handleTrackEvent = (event: RTCTrackEvent) => {
       const [incomingStream] = event.streams; // Get the MediaStream from event.streams
-      console.log("Received track event:", event.track);
+      // console.log("Received track event:", event.track);
       setRemoteStream(incomingStream)
     };
 
@@ -289,7 +345,7 @@ const handleScreenShare = useCallback(async () => {
   ]);
 
   const userDisConnected = useCallback(async () => {
-    console.log("You've been skipped. Looking for a new user...");
+    // console.log("You've been skipped. Looking for a new user...");
     setFlag(true);
     peerservice.peer.getTransceivers().forEach((transceiver) => {
       if (transceiver.stop) {
@@ -304,9 +360,9 @@ const handleScreenShare = useCallback(async () => {
     peerservice.peer.onicecandidate = null;
     peerservice.peer.ontrack = null;
     peerservice.peer.onnegotiationneeded = null;
-    
+
     if (peerservice.peer.signalingState !== "closed") {
-      console.log("closed");
+      // console.log("closed");
       peerservice.peer.close();
     }
 
@@ -328,7 +384,7 @@ const handleScreenShare = useCallback(async () => {
   useEffect(() => {
     peerservice.peer.onicecandidate = (event) => {
       if (event.candidate) {
-        console.log("Sending ICE candidate:", event.candidate);
+        // console.log("Sending ICE candidate:", event.candidate);
         socket?.emit("ice-candidate", {
           candidate: event.candidate,
           to: remoteSocketId,
@@ -343,7 +399,7 @@ const handleScreenShare = useCallback(async () => {
         const candidate = new RTCIceCandidate(data.candidate);
         peerservice.peer.addIceCandidate(candidate)
           .then(() => {
-            console.log("Added ICE candidate:", candidate);
+            // console.log("Added ICE candidate:", candidate);
           })
           .catch((error) => {
             console.error("Error adding ICE candidate:", error);
@@ -355,7 +411,6 @@ const handleScreenShare = useCallback(async () => {
       socket?.off("ice-candidate");
     };
   }, [socket]);
-  
   
 
   useEffect(() => {
@@ -384,16 +439,44 @@ const handleScreenShare = useCallback(async () => {
     userDisConnected,
   ]);
 
-  // const checkConnection = useCallback(() => {
-  //   if(remoteSocketId && !remoteStream){
-  //     console.log("not connected...");
-  //     sendStream();
-  //   }
-  // }, [remoteSocketId, remoteStream, sendStream]);
 
-  // useEffect(() => {
-  //   checkConnection();
-  // }, [checkConnection])
+  const handleCleanup = useCallback(() => {
+    // console.log("Cleaning up...");
+
+    // Stop camera stream
+    if (myStream) {
+      myStream.getTracks().forEach((track) => {
+        // console.log("Stopping track:", track);
+        track.stop(); // Stop each media track (video/audio)
+      });
+      setMyStream(null); // Clear the state to ensure the stream is stopped
+    }
+
+    // Stop screen sharing stream
+    if (screenStream) {
+      screenStream.getTracks().forEach((track) => {
+        // console.log("Stopping screen sharing track:", track);
+        track.stop(); // Stop each screen sharing track
+      });
+      setScreenStream(null);
+      setIsScreenSharing(false);
+    }
+
+    // Disconnect the socket
+    if (socket) {
+      socket.disconnect();
+    }
+
+    // Close and reset Peer Connection
+    if (peerservice.peer.signalingState !== "closed") {
+      peerservice.peer.close();
+      peerservice.initPeer();  // Re-initialize the peer connection if needed
+    }
+
+    navigate('/');
+    window.location.reload();
+  }, [myStream, navigate, screenStream, socket]);
+
 
   return (
     <div className="flex w-screen h-full">
@@ -405,12 +488,13 @@ const handleScreenShare = useCallback(async () => {
             height={"50%"}
             url={myStream}
             playing
+            muted
           />
         ) : (
           <div className="flex flex-col gap-4 items-center justify-center w-[448px] h-[50%] bg-gray-300 dark:bg-gray-700">
             <ClipLoader color={loaderColor} size={50} />
             <p className="text-gray-600 dark:text-gray-300">
-              Loading my stream...
+              Loading your stream...
             </p>
           </div>
         )}
@@ -420,6 +504,7 @@ const handleScreenShare = useCallback(async () => {
             height={"50%"}
             url={remoteStream}
             playing
+            muted={false}
           />
         ) : (
           <div className="flex flex-col gap-4 items-center justify-center w-[448px] h-[50%] bg-gray-300 dark:bg-gray-700">
@@ -434,13 +519,13 @@ const handleScreenShare = useCallback(async () => {
       <div className="flex-1 flex flex-col">
         {/* Buttons */}
         <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex gap-4 h-16">
-          {/* <Button
+          <Button
             className="w-[200px] max-lg:w-auto gap-2"
-            onClick={handleBackToHome}
+            onClick={handleCleanup}
           >
             <StepBack size={18} />
             Stop 
-          </Button> */}
+          </Button>
           <Button
             className="w-[200px] max-lg:w-auto gap-2"
             onClick={handleSkip}
