@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build && npm run generate-sitemap",
     "lint": "eslint .",
     "preview": "vite preview",
-    "generate-sitemap": "sitemap-generator https://rhinomeet.com --output ./public/sitemap.xml"
+    "generate-sitemap": "sitemap-generator https://rhinomeet.com --output sitemap.xml && mv sitemap.xml public/"
   },
   "dependencies": {
     "@radix-ui/react-icons": "^1.3.0",
