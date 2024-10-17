@@ -5,6 +5,7 @@ import { io } from "socket.io-client";
 import { useNavigate } from "react-router-dom";
 import LogoContent from "../components/LogoContent";
 import { Github } from "lucide-react";
+import { Helmet } from "react-helmet-async";
 
 export default function Home(){
     const {socket, setSocket} = useSocket();
@@ -22,6 +23,15 @@ export default function Home(){
     }, [setSocket, socket, navigate]);
 
     return (
+        <>
+        <Helmet>
+        <title>RhinoMeet</title>
+        <meta
+          name="description"
+          content="RhinoMeet is an innovative video chat application designed to connect users from all around the world for spontaneous and engaging conversations. Built with a focus on ease of use and seamless interaction, RhinoMeet allows users to effortlessly start video calls, share screens, and exchange messages in real-time. Whether you're seeking to meet new people, collaborate on projects, or simply enjoy face-to-face interactions, RhinoMeet delivers a smooth experience with user-friendly features. It prioritizes privacy, utilizing encrypted connections to ensure that all communications are secure. The platform's sleek and modern design, combined with features like quick user pairing, screen sharing, and integrated messaging, makes RhinoMeet a go-to choice for both casual and professional video chatting."
+        />
+        <meta name="keywords" content="omegle, Random Video chat, Random call, Video call, omegel clone, omegle type apps, Rhinomeet, rhinomeet.com, meet, random chat, messages, video chat, screen sharing, real-time messaging, secure video calls" />
+      </Helmet>
         <div className="flex flex-col items-center justify-center w-full h-full px-16 py-4 max-md:px-8">
             <div className="flex items-end gap-4">
                 <svg version="1.0" xmlns="http://www.w3.org/2000/svg"
@@ -36,7 +46,7 @@ export default function Home(){
                 RhinoMeet is an innovative video chat application designed to connect users from all around the world for spontaneous and engaging conversations. Built with a focus on ease of use and seamless interaction, RhinoMeet allows users to effortlessly start video calls, share screens, and exchange messages in real-time. Whether you're seeking to meet new people, collaborate on projects, or simply enjoy face-to-face interactions, RhinoMeet delivers a smooth experience with user-friendly features. It prioritizes privacy, utilizing encrypted connections to ensure that all communications are secure. The platform's sleek and modern design, combined with features like quick user pairing, screen sharing, and integrated messaging, makes RhinoMeet a go-to choice for both casual and professional video chatting.
                 </div>
                 <div className="flex gap-2 items-center font-bold text-xl max-lg:flex-col font-serif">Any contribution to the community is highly appreciated. 
-                    <a href="https://github.com/Shobhit2205/RhinoTalk/" target="_blank" rel="noopener noreferrer"
+                    <a href="https://github.com/Shobhit2205/RhinoMeet" target="_blank" rel="noopener noreferrer"
                     >
                         <Button className="flex gap-2 font-bold tracking-widest" ><Github size={18}/>Github</Button>
                     </a>
@@ -44,5 +54,6 @@ export default function Home(){
                 <Button className="w-full max-w-xs py-3 text-lg font-semibold font-serif  tracking-widest shadow-md" onClick={(e) => handleStartCall(e)}>START</Button>
             </div>
         </div>
+        </>
     );
 }
