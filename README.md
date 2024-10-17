@@ -123,3 +123,7 @@ To install and run this project locally, follow these steps:
 ![Screenshot 4](screenshots/screenshot4.png)
 
 ![Screenshot 5](screenshots/screenshot5.png)
+
+<!--
+Keywords: omegle, omegle clone github, videochat application github, random chat, github, mern stack project github, mern project, typescript, nodejs, socket-io, socketio, webrtc, websocket, real time communication, learn webrtc, open source project, Random Video chat, Random call, Video call, omegel clone, omegle type apps, Rhinomeet, rhinomeet.com, meet, random chat, messages, video chat, screen sharing, real-time messaging, secure video calls
+-->
