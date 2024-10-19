@@ -1,0 +1,117 @@
+/* ================================
+   Futuristic Design - RhinoMeet Layout
+   ================================ */
+
+/* --------------------
+   Background Animation 
+   -------------------- */
+   .futuristic-bg {
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); /* Dark blue gradient */
+    background-size: 400% 400%;
+    animation: backgroundAnimation 15s ease infinite;
+  }
+  
+  /* Background animation keyframes */
+  @keyframes backgroundAnimation {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+  
+  /* --------------------
+     Glassmorphism Container
+     -------------------- */
+  .glassmorphism-container {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(15px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
+    border-radius: 20px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  /* Hover effect for the glass container */
+  .glassmorphism-container:hover {
+    transform: scale(1.02);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+  }
+  
+  /* --------------------
+     Futuristic Content Area
+     -------------------- */
+  .futuristic-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    margin: 0 auto;
+    z-index: 1;
+  }
+  
+  /* Mobile responsive adjustments */
+  @media (max-width: 768px) {
+    .futuristic-content {
+      padding: 12px;
+    }
+  }
+  
+  /* --------------------
+     Neon Glow Effect 
+     -------------------- */
+  .header-title,
+  .header-links {
+    color: #fff;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.6); /* Neon effect */
+    transition: color 0.3s ease, text-shadow 0.3s ease;
+  }
+  
+  /* Hover effect for links */
+  .header-links:hover {
+    color: #0ff;
+    text-shadow: 0 0 15px #0ff, 0 0 25px #00f, 0 0 40px rgba(0, 255, 255, 0.8); /* Intense neon glow on hover */
+  }
+  
+  /* --------------------
+     Button Glow Effect 
+     -------------------- */
+  button {
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); /* Same as background for consistency */
+    border: none;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.5), 0 0 20px rgba(0, 255, 255, 0.3); /* Soft glow around button */
+    transition: all 0.3s ease;
+  }
+  
+  /* Hover effect for buttons */
+  button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.8), 0 0 30px rgba(0, 255, 255, 0.6); /* Stronger glow on hover */
+  }
+  
+  /* --------------------
+     General Text Styling
+     -------------------- */
+  p,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    color: #fff;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.7);
+  }
+  
+  /* ================================
+     End of Stylesheet
+     ================================ */
+  
