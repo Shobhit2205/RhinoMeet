@@ -7,53 +7,106 @@ import LogoContent from "../components/LogoContent";
 import { Github } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 
-export default function Home(){
-    const {socket, setSocket} = useSocket();
-    const navigate = useNavigate();
-    
-    const handleStartCall = useCallback((e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        e.preventDefault();
-        navigate('/chat');
+export default function Home() {
+  const { socket, setSocket } = useSocket();
+  const navigate = useNavigate();
 
-        if(!socket){
-            const newSocket = io(import.meta.env.VITE_API_SERVER_URL);
-            setSocket(newSocket);
-        }
-        
-    }, [setSocket, socket, navigate]);
+  const handleStartCall = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      e.preventDefault();
+      if (!socket) {
+        const newSocket = io(import.meta.env.VITE_API_SERVER_URL);
+        setSocket(newSocket);
+      }
+      navigate("/chat");
+    },
+    [setSocket, socket, navigate]
+  );
 
-    return (
-        <>
-        <Helmet>
-        <title>RhinoMeet</title>
+  return (
+    <>
+      <Helmet>
+        <title>RhinoMeet - Connect, Chat, Collaborate</title>
         <meta
           name="description"
           content="RhinoMeet is an innovative video chat application designed to connect users from all around the world for spontaneous and engaging conversations. Built with a focus on ease of use and seamless interaction, RhinoMeet allows users to effortlessly start video calls, share screens, and exchange messages in real-time. Whether you're seeking to meet new people, collaborate on projects, or simply enjoy face-to-face interactions, RhinoMeet delivers a smooth experience with user-friendly features. It prioritizes privacy, utilizing encrypted connections to ensure that all communications are secure. The platform's sleek and modern design, combined with features like quick user pairing, screen sharing, and integrated messaging, makes RhinoMeet a go-to choice for both casual and professional video chatting."
         />
-        <meta name="keywords" content="omegle, Random Video chat, Random call, Video call, omegel clone, omegle type apps, Rhinomeet, rhinomeet.com, meet, random chat, messages, video chat, screen sharing, real-time messaging, secure video calls" />
+        <meta
+          name="keywords"
+          content="omegle, Random Video chat, Random call, Video call, omegle clone, omegle type apps, Rhinomeet, rhinomeet.com, meet, random chat, messages, video chat, screen sharing, real-time messaging, secure video calls"
+        />
       </Helmet>
-        <div className="flex flex-col items-center justify-center w-full h-full px-16 py-4 max-md:px-8">
-            <div className="flex items-end gap-4">
-                <svg version="1.0" xmlns="http://www.w3.org/2000/svg"
-                    width="1508.204676pt" height="836.077412pt" viewBox="0 0 1508.204676 836.077412"
-                    preserveAspectRatio="xMidYMid meet" className="h-auto w-[350px] max-lg:w-[200px] max-md:w-[100px] text-black dark:text-white">
-                    <LogoContent/>
-                </svg>
-                <div className="text-[100px] max-lg:text-[60px] max-md:text-[30px] font-bold mb-[-39px] max-lg:mb-[-24px] max-md:mb-[-12px] font-serif">RhinoMeet</div>
+      <main className="flex flex-col gap-4 justify-center p-6 md:p-12 lg:p-24 h-full mx-auto">
+        <div className="w-full flex flex-col lg:flex-row justify-evenly mx-auto">
+          <div className="flex flex-col items-center justify-center text-center">
+            <div className="flex items-end gap-4 mb-6">
+              <svg
+                version="1.0"
+                xmlns="http://www.w3.org/2000/svg"
+                width="1508.204676pt"
+                height="836.077412pt"
+                viewBox="0 0 1508.204676 836.077412"
+                preserveAspectRatio="xMidYMid meet"
+                className="h-auto w-[200px] max-md:w-[150px] text-black dark:text-white"
+              >
+                <LogoContent />
+              </svg>
             </div>
-            <div className="bg-gray-100 dark:bg-gray-800 shadow-lg flex flex-col items-center justify-center text-center gap-8 p-8 md:p-12  border rounded-2xl">
-                <div className="text-gray-900 dark:text-gray-100 leading-relaxed space-y-4 font-serif">
-                RhinoMeet is an innovative video chat application designed to connect users from all around the world for spontaneous and engaging conversations. Built with a focus on ease of use and seamless interaction, RhinoMeet allows users to effortlessly start video calls, share screens, and exchange messages in real-time. Whether you're seeking to meet new people, collaborate on projects, or simply enjoy face-to-face interactions, RhinoMeet delivers a smooth experience with user-friendly features. It prioritizes privacy, utilizing encrypted connections to ensure that all communications are secure. The platform's sleek and modern design, combined with features like quick user pairing, screen sharing, and integrated messaging, makes RhinoMeet a go-to choice for both casual and professional video chatting.
-                </div>
-                <div className="flex gap-2 items-center font-bold text-xl max-lg:flex-col font-serif">Any contribution to the community is highly appreciated. 
-                    <a href="https://github.com/Shobhit2205/RhinoMeet" target="_blank" rel="noopener noreferrer"
-                    >
-                        <Button className="flex gap-2 font-bold tracking-widest" ><Github size={18}/>Github</Button>
-                    </a>
-                </div>
-                <Button className="w-full max-w-xs py-3 text-lg font-semibold font-serif  tracking-widest shadow-md" onClick={(e) => handleStartCall(e)}>START</Button>
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold font-serif mb-2">
+              RhinoMeet
+            </h1>
+            <p className="text-lg sm:text-xl md:text-2xl mb-6">
+              Connect. Chat. Collaborate.
+            </p>
+          </div>
+
+          <div className="bg-gradient-to-r from-teal-500 to-blue-600 shadow-2xl rounded-3xl p-6 md:p-8  w-full mx-4 backdrop-blur-lg bg-opacity-60 border border-teal-300">
+            <p className="text-base md:text-xl mb-8 leading-relaxed text-gray-200">
+              RhinoMeet is an innovative video chat application designed to
+              connect users from all around the world for spontaneous and engaging
+              conversations. Built with a focus on ease of use and seamless
+              interaction, RhinoMeet allows users to effortlessly start video
+              calls, share screens, and exchange messages in real-time. Whether
+              you're seeking to meet new people, collaborate on projects, or
+              simply enjoy face-to-face interactions, RhinoMeet delivers a smooth
+              experience with user-friendly features. It prioritizes privacy,
+              utilizing encrypted connections to ensure that all communications
+              are secure. The platform's sleek and modern design, combined with
+              features like quick user pairing, screen sharing, and integrated
+              messaging, makes RhinoMeet a go-to choice for both casual and
+              professional video chatting.
+            </p>
+
+            <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mb-8">
+              <Button
+                className="w-full sm:w-auto py-4 text-lg font-semibold tracking-wider shadow-lg transition-transform duration-300 hover:scale-105 bg-teal-600 hover:bg-teal-700"
+                onClick={handleStartCall}
+              >
+                Start Your Journey
+              </Button>
+              <a
+                href="https://github.com/Shobhit2205/RhinoMeet"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full sm:w-auto"
+              >
+                <Button
+                  variant="outline"
+                  className="w-full py-4 text-lg font-semibold tracking-wider shadow-lg transition-transform duration-300 hover:scale-105 flex items-center justify-center gap-2 border-gray-600"
+                >
+                  <Github size={24} />
+                  Contribute on GitHub
+                </Button>
+              </a>
             </div>
+
+            <div className="text-sm text-center mt-4">
+              By using RhinoMeet, you agree to our Terms of Service and Privacy
+              Policy.
+            </div>
+          </div>
         </div>
-        </>
-    );
+      </main>
+    </>
+  );
 }
