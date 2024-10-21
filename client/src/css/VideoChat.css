@@ -1,0 +1,9 @@
+button {
+    transition: all 0.3s ease;
+  }
+  
+  button:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5);
+  }
+  

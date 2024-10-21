@@ -8,6 +8,7 @@ import { ScreenShare, StepBack, StepForward } from "lucide-react";
 import { ClipLoader } from "react-spinners"; // Import the spinner
 import { useTheme } from "../components/theme-provider";
 import { useNavigate } from "react-router-dom";
+import "../css/VideoChat.css";
 
 interface Offer {
   offer: RTCSessionDescriptionInit;
@@ -40,18 +41,17 @@ export default function VideoChat() {
   const navigate = useNavigate();
 
   const loaderColor = theme.theme === "dark" ? "#D1D5DB" : "#4B5563";
-  
 
   const getUserStream = useCallback(async () => {
     const stream = await navigator.mediaDevices.getUserMedia({
       video: true,
       audio: {
-        echoCancellation: true,  
-        noiseSuppression: true,  
-        autoGainControl: true, 
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true,
         sampleRate: 48000, // CD-quality audio sample rate
-        sampleSize: 16,    // Higher sample size
-        channelCount: 2    // Stereo audio
+        sampleSize: 16, // Higher sample size
+        channelCount: 2 // Stereo audio
       }
     });
     // const processedStream = processAudio(stream);
@@ -86,66 +86,70 @@ export default function VideoChat() {
     }
   }, [myStream]);
 
-
   const handleScreenShare = useCallback(async () => {
     if (isScreenSharing) {
-       
-        const videoTrack = myStream?.getVideoTracks()[0]; 
-        const screenSender = peerservice.peer.getSenders().find((s) => s.track?.kind === "video");
+      const videoTrack = myStream?.getVideoTracks()[0];
+      const screenSender = peerservice.peer
+        .getSenders()
+        .find((s) => s.track?.kind === "video");
 
-        if (videoTrack && screenSender) {
-            screenSender.replaceTrack(videoTrack);
-        }
+      if (videoTrack && screenSender) {
+        screenSender.replaceTrack(videoTrack);
+      }
 
-        // Stop all tracks in the screen stream
-        screenStream?.getTracks().forEach((track) => track.stop());
-        setScreenStream(null);
-        setMyStream(myStream); // Reset local view back to the webcam stream
-        setIsScreenSharing(false);
+      // Stop all tracks in the screen stream
+      screenStream?.getTracks().forEach((track) => track.stop());
+      setScreenStream(null);
+      setMyStream(myStream); // Reset local view back to the webcam stream
+      setIsScreenSharing(false);
 
-        // Renegotiate after stopping screen sharing
-        if (peerservice.peer.signalingState === "stable") {
-            const offer = await peerservice.getOffer();
-            socket?.emit("peer:nego:needed", { offer, to: remoteSocketId });
-        }
+      // Renegotiate after stopping screen sharing
+      if (peerservice.peer.signalingState === "stable") {
+        const offer = await peerservice.getOffer();
+        socket?.emit("peer:nego:needed", { offer, to: remoteSocketId });
+      }
     } else {
-        try {
+      try {
+        const stream = await navigator.mediaDevices.getDisplayMedia({
+          video: true
+        });
+        setScreenStream(stream);
+        setMyStream(stream);
+        setIsScreenSharing(true);
 
-            const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
-            setScreenStream(stream);
-            setMyStream(stream); 
-            setIsScreenSharing(true);
+        const screenTrack = stream.getVideoTracks()[0];
+        const videoSender = peerservice.peer
+          .getSenders()
+          .find((s) => s.track?.kind === "video");
 
-            const screenTrack = stream.getVideoTracks()[0];
-            const videoSender = peerservice.peer.getSenders().find((s) => s.track?.kind === "video");
-
-            if (videoSender) {
-                videoSender.replaceTrack(screenTrack); 
-            } else {
-                peerservice.peer.addTrack(screenTrack, stream); 
-            }
-
-            if (peerservice.peer.signalingState === "stable") {
-                const offer = await peerservice.getOffer();
-                socket?.emit("peer:nego:needed", { offer, to: remoteSocketId });
-            }
-        } catch (error) {
-            console.error("Error sharing screen:", error);
+        if (videoSender) {
+          videoSender.replaceTrack(screenTrack);
+        } else {
+          peerservice.peer.addTrack(screenTrack, stream);
         }
+
+        if (peerservice.peer.signalingState === "stable") {
+          const offer = await peerservice.getOffer();
+          socket?.emit("peer:nego:needed", { offer, to: remoteSocketId });
+        }
+      } catch (error) {
+        console.error("Error sharing screen:", error);
+      }
     }
   }, [isScreenSharing, myStream, screenStream, remoteSocketId, socket]);
 
   const setAudioBandwidth = (peerConnection: RTCPeerConnection) => {
-    const sender = peerConnection.getSenders().find(s => s.track && s.track.kind === 'audio');
+    const sender = peerConnection
+      .getSenders()
+      .find((s) => s.track && s.track.kind === "audio");
     if (sender) {
       const parameters = sender.getParameters();
       parameters.encodings[0] = {
-        maxBitrate: 128000, // Set a high bitrate for audio, 128 kbps
+        maxBitrate: 128000 // Set a high bitrate for audio, 128 kbps
       };
       sender.setParameters(parameters);
     }
   };
-  
 
   const handleUserJoined = useCallback(
     async (remoteId: string) => {
@@ -198,15 +202,14 @@ export default function VideoChat() {
       "a=fmtp:111 maxplaybackrate=48000;stereo=1;sprop-stereo=1;maxaveragebitrate=510000;useinbandfec=1"
     );
   };
-  
+
   const handleNegotiationNeeded = useCallback(async () => {
     if (peerservice.peer.signalingState === "stable") {
       const currentOffer = await peerservice.getOffer();
-      
-  
+
       if (currentOffer && currentOffer.sdp) {
         const modifiedSDP = modifySDP(currentOffer.sdp);
-        
+
         // Create a new RTCSessionDescription with the modified SDP
         const modifiedOffer = new RTCSessionDescription({
           type: currentOffer.type,
@@ -214,12 +217,12 @@ export default function VideoChat() {
         });
 
         setAudioBandwidth(peerservice.peer);
-  
+
         socket?.emit("peer:nego:needed", {
           offer: modifiedOffer,
-          to: remoteSocketId,
+          to: remoteSocketId
         });
-  
+
         // console.log("Negotiation initiated with modified SDP.");
       }
     } else {
@@ -317,12 +320,18 @@ export default function VideoChat() {
 
   useEffect(() => {
     if (flag !== true) {
-      peerservice.peer.addEventListener("negotiationneeded", handleNegotiationNeeded);
+      peerservice.peer.addEventListener(
+        "negotiationneeded",
+        handleNegotiationNeeded
+      );
       setFlag(false);
     }
 
     return () => {
-      peerservice.peer.removeEventListener("negotiationneeded", handleNegotiationNeeded);
+      peerservice.peer.removeEventListener(
+        "negotiationneeded",
+        handleNegotiationNeeded
+      );
     };
   }, [flag, handleNegotiationNeeded]);
 
@@ -330,7 +339,7 @@ export default function VideoChat() {
     const handleTrackEvent = (event: RTCTrackEvent) => {
       const [incomingStream] = event.streams; // Get the MediaStream from event.streams
       // console.log("Received track event:", event.track);
-      setRemoteStream(incomingStream)
+      setRemoteStream(incomingStream);
     };
 
     peerservice.peer.addEventListener("track", handleTrackEvent);
@@ -338,11 +347,7 @@ export default function VideoChat() {
     return () => {
       peerservice.peer.removeEventListener("track", handleTrackEvent);
     };
-  }, [
-    isScreenSharing,
-    sendStream,
-    flag
-  ]);
+  }, [isScreenSharing, sendStream, flag]);
 
   const userDisConnected = useCallback(async () => {
     // console.log("You've been skipped. Looking for a new user...");
@@ -387,7 +392,7 @@ export default function VideoChat() {
         // console.log("Sending ICE candidate:", event.candidate);
         socket?.emit("ice-candidate", {
           candidate: event.candidate,
-          to: remoteSocketId,
+          to: remoteSocketId
         });
       }
     };
@@ -397,7 +402,8 @@ export default function VideoChat() {
     socket?.on("ice-candidate", (data) => {
       if (data.candidate) {
         const candidate = new RTCIceCandidate(data.candidate);
-        peerservice.peer.addIceCandidate(candidate)
+        peerservice.peer
+          .addIceCandidate(candidate)
           .then(() => {
             // console.log("Added ICE candidate:", candidate);
           })
@@ -406,12 +412,11 @@ export default function VideoChat() {
           });
       }
     });
-    
+
     return () => {
       socket?.off("ice-candidate");
     };
   }, [socket]);
-  
 
   useEffect(() => {
     socket?.on("user:connect", handleUserJoined);
@@ -436,9 +441,8 @@ export default function VideoChat() {
     handleNegotiationIncomming,
     handleUserJoined,
     socket,
-    userDisConnected,
+    userDisConnected
   ]);
-
 
   const handleCleanup = useCallback(() => {
     // console.log("Cleaning up...");
@@ -470,92 +474,118 @@ export default function VideoChat() {
     // Close and reset Peer Connection
     if (peerservice.peer.signalingState !== "closed") {
       peerservice.peer.close();
-      peerservice.initPeer();  // Re-initialize the peer connection if needed
+      peerservice.initPeer(); // Re-initialize the peer connection if needed
     }
 
-    navigate('/');
+    navigate("/");
     window.location.reload();
   }, [myStream, navigate, screenStream, socket]);
 
-
   return (
-    <div className="flex w-screen h-full">
-      {/* Left Side  */}
-      <div className="border-r border-gray-200 dark:border-gray-700 w-[450px] h-[calc(100vh-64px)]">
+    <div className="flex flex-col lg:flex-row w-screen bg-gradient-to-b from-gray-200 to-gray-400 dark:from-gray-800 dark:to-gray-900 transition-colors duration-300">
+      {/* Left Side */}
+      <div className="lg:w-[450px] w-full lg:h-[calc(100vh-64px)] h-auto border-b lg:border-b-0 lg:border-r border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-xl rounded-lg overflow-hidden">
+        {/* My Stream */}
         {myStream ? (
-          <ReactPlayer
-            width={"448px"}
-            height={"50%"}
-            url={myStream}
-            playing
-            muted
-          />
+          <div className="relative w-full h-64 lg:h-1/2">
+            <ReactPlayer
+              className="absolute inset-0 rounded-lg"
+              url={myStream}
+              playing
+              muted
+              width="100%"
+              height="100%"
+            />
+            <div className="absolute bottom-0 left-0 bg-gradient-to-t from-black via-transparent to-transparent p-3 text-white text-sm rounded-tl-lg">
+              My Stream
+            </div>
+          </div>
         ) : (
-          <div className="flex flex-col gap-4 items-center justify-center w-[448px] h-[50%] bg-gray-300 dark:bg-gray-700">
+          <div className="flex flex-col items-center justify-center w-full h-64 lg:h-1/2 bg-gray-400 dark:bg-gray-700 rounded-lg shadow-md">
             <ClipLoader color={loaderColor} size={50} />
-            <p className="text-gray-600 dark:text-gray-300">
+            <p className="text-gray-600 dark:text-gray-300 mt-2">
               Loading your stream...
             </p>
           </div>
         )}
+
+        {/* Remote Stream */}
         {remoteStream ? (
-          <ReactPlayer
-            width={"448px"}
-            height={"50%"}
-            url={remoteStream}
-            playing
-            muted={false}
-          />
+          <div className="relative w-full h-64 lg:h-1/2">
+            <ReactPlayer
+              className="absolute inset-0 rounded-lg"
+              url={remoteStream}
+              playing
+              muted={false}
+              width="100%"
+              height="100%"
+            />
+            <div className="absolute bottom-0 left-0 bg-gradient-to-t from-black via-transparent to-transparent p-3 text-white text-sm rounded-tl-lg">
+              Remote Stream
+            </div>
+          </div>
         ) : (
-          <div className="flex flex-col gap-4 items-center justify-center w-[448px] h-[50%] bg-gray-300 dark:bg-gray-700">
+          <div className="flex flex-col items-center justify-center w-full h-64 lg:h-1/2 bg-gray-400 dark:bg-gray-700 rounded-lg shadow-md">
             <ClipLoader color={loaderColor} size={50} />
-            <p className="text-gray-600 dark:text-gray-300">
+            <p className="text-gray-600 dark:text-gray-300 mt-2">
               Waiting for user to connect...
             </p>
           </div>
         )}
       </div>
 
-      <div className="flex-1 flex flex-col">
-        {/* Buttons */}
-        <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex gap-4 h-16">
+      {/* Right Side */}
+      <div className="flex-1 flex flex-col w-full">
+        {/* Button Controls */}
+        <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex flex-row gap-4 h-auto sm:h-16 shadow rounded-lg bg-gray-50 dark:bg-gray-900">
           <Button
-            className="w-[200px] max-lg:w-auto gap-2"
+            className="flex-1 p-2 gap-2 bg-red-600 text-white rounded-md"
+            size={"icon"}
             onClick={handleCleanup}
           >
             <StepBack size={18} />
-            Stop 
+            <span className="hidden sm:inline">Stop</span>
           </Button>
           <Button
-            className="w-[200px] max-lg:w-auto gap-2"
+            className={`flex-1 p-2 gap-2 bg-blue-600 text-white rounded-md ${
+              remoteSocketId === null ? "opacity-50 cursor-not-allowed" : ""
+            }`}
+            size={"icon"}
             onClick={handleSkip}
             disabled={remoteSocketId === null}
           >
-            Skip
             <StepForward size={18} />
+            <span className="hidden sm:inline">Skip</span>
           </Button>
           <Button
-            className="w-[200px] max-lg:w-auto gap-2"
+            className="flex-1 p-2 gap-2 bg-green-600 text-white rounded-md"
             onClick={handleScreenShare}
+            size={"icon"}
           >
             <ScreenShare size={18} />
-            {isScreenSharing ? "Stop Sharing Screen" : "Share Screen"}
+            <span className="hidden sm:inline">
+              {isScreenSharing ? "Stop Sharing" : "Share Screen"}
+            </span>
           </Button>
         </div>
 
-        {/* Messages */}
-        <div className="flex-1 max-h-[calc(100vh-128px)]">
-          {screenStream ? 
-          <ReactPlayer
-          width={"100%"}
-          height={"100%"}
-          url={screenStream}
-          playing
-        /> :<Messages
-            remoteSocketId={remoteSocketId}
-            messagesArray={messagesArray}
-            setMessagesArray={setMessagesArray}
-          />}
+        {/* Messages Area */}
+        <div className="flex-1 max-h-[calc(100vh-128px)] overflow-auto p-4 bg-white dark:bg-gray-800 rounded-lg shadow-inner">
+          {screenStream ? (
+            <ReactPlayer
+              className="w-full h-full rounded-lg"
+              url={screenStream}
+              playing
+              width="100%"
+              height="100%"
+            />
+          ) : (
+            <Messages
+              remoteSocketId={remoteSocketId}
+              messagesArray={messagesArray}
+              setMessagesArray={setMessagesArray}
+            />
+          )}
         </div>
       </div>
     </div>
