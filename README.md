@@ -1,5 +1,14 @@
 # RhinoMeet
 
+[![GitHub license](https://img.shields.io/github/license/Shobhit2205/RhinoMeet)](https://github.com/Shobhit2205/RhinoMeet/blob/main/LICENSE)
+[![GitHub issues](https://img.shields.io/github/issues/Shobhit2205/RhinoMeet)](https://github.com/Shobhit2205/RhinoMeet/issues)
+[![GitHub stars](https://img.shields.io/github/stars/Shobhit2205/RhinoMeet)](https://github.com/Shobhit2205/RhinoMeet/stargazers)
+![Node.js](https://img.shields.io/badge/Node.js-8CC84A?style=flat&logo=nodedotjs&logoColor=white)
+![React](https://img.shields.io/badge/React-61DAFB?style=flat&logo=react&logoColor=black)
+![WebRTC](https://img.shields.io/badge/WebRTC-33B4D9?style=flat&logo=webrtc&logoColor=white)
+![Socket.IO](https://img.shields.io/badge/Socket.IO-010101?style=flat&logo=socketdotio&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat&logo=javascript&logoColor=black)
+
 RhinoMeet is a WebRTC-based video chat application inspired by Omegle. It allows users to connect and communicate in real-time via audio, video, and text chat. The application leverages WebSockets for signaling and WebRTC for media transmission between peers. Users can join random video chats with other connected users, enjoy features like screen sharing, skipping users, and real-time text messaging.
 
 ## Features
@@ -53,7 +62,7 @@ To install and run this project locally, follow these steps:
 
 ### Frontend Setup
 
-1. starting frontend and Install dependencies:
+1. Install dependencies:
 
     ```bash
     cd client
@@ -66,7 +75,7 @@ To install and run this project locally, follow these steps:
     cp .env.example .env
     ```
 
-3. Start the Frontend:
+3. Start the frontend:
 
     ```bash
     npm run dev
@@ -103,6 +112,17 @@ To install and run this project locally, follow these steps:
 
 5. Submit a pull request.
 
+## Contributors
+
+<a href="https://github.com/Shobhit2205/RhinoMeet/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=Shobhit2205/RhinoMeet" />
+</a>
+<!-- Add more contributors here -->
+<!-- Example -->
+<!-- <a href="https://github.com/username">
+    <img src="https://avatars.githubusercontent.com/u/xxx?v=4" alt="Contributor Name" width="60" height="60" />
+</a> -->
+
 ## Acknowledgments
 
 - Inspired by [Omegle](https://www.omegle.com/).
@@ -110,20 +130,13 @@ To install and run this project locally, follow these steps:
 
 ## Author
 
-- [Shobhit Pandey](https://github.com/Shobhit2205) - [shobhitpandey2205@gmail.com](shobhitpandey2205@gmail.com)
+- [Shobhit Pandey](https://github.com/Shobhit2205) - [shobhitpandey2205@gmail.com](mailto:shobhitpandey2205@gmail.com)
 
 ## Screenshots
 
 ![Screenshot 1](screenshots/screenshot1.png)
-
 ![Screenshot 2](screenshots/screenshot2.png)
-
 ![Screenshot 3](screenshots/screenshot3.png)
-
 ![Screenshot 4](screenshots/screenshot4.png)
-
 ![Screenshot 5](screenshots/screenshot5.png)
 
-<!--
-Keywords: omegle, omegle clone github, videochat application github, random chat, github, mern stack project github, mern project, typescript, nodejs, socket-io, socketio, webrtc, websocket, real time communication, learn webrtc, open source project, Random Video chat, Random call, Video call, omegel clone, omegle type apps, Rhinomeet, rhinomeet.com, meet, random chat, messages, video chat, screen sharing, real-time messaging, secure video calls
--->
