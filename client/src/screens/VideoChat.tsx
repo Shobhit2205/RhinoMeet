@@ -8,6 +8,7 @@ import { ScreenShare, StepBack, StepForward } from "lucide-react";
 import { ClipLoader } from "react-spinners"; // Import the spinner
 import { useTheme } from "../components/theme-provider";
 import { useNavigate } from "react-router-dom";
+import "../css/VideoChat.css";
 
 interface Offer {
   offer: RTCSessionDescriptionInit;
@@ -481,103 +482,112 @@ export default function VideoChat() {
   }, [myStream, navigate, screenStream, socket]);
 
   return (
-    <div className="flex w-screen h-full bg-gray-50 dark:bg-gray-900">
+    <div className="flex flex-col lg:flex-row w-screen bg-gradient-to-b from-gray-200 to-gray-400 dark:from-gray-800 dark:to-gray-900 transition-colors duration-300">
       {/* Left Side */}
-      <div className="border-r border-gray-200 dark:border-gray-700 w-[450px] h-[calc(100vh-64px)] bg-white dark:bg-gray-800 shadow-lg overflow-hidden rounded-lg">
+      <div className="lg:w-[450px] w-full lg:h-[calc(100vh-64px)] h-auto border-b lg:border-b-0 lg:border-r border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-xl rounded-lg overflow-hidden">
         {/* My Stream */}
         {myStream ? (
-          <div className="relative w-full h-1/2">
+          <div className="relative w-full h-64 lg:h-1/2">
             <ReactPlayer
-              className="absolute inset-0"
+              className="absolute inset-0 rounded-lg"
               url={myStream}
               playing
               muted
               width="100%"
               height="100%"
             />
-            <div className="absolute bottom-0 left-0 bg-black bg-opacity-60 p-2 text-white text-sm rounded-tl-lg">
+            <div className="absolute bottom-0 left-0 bg-gradient-to-t from-black via-transparent to-transparent p-3 text-white text-sm rounded-tl-lg">
               My Stream
             </div>
           </div>
         ) : (
-          <div className="flex flex-col gap-4 items-center justify-center w-full h-1/2 bg-gray-300 dark:bg-gray-700 rounded-lg shadow-md">
+          <div className="flex flex-col items-center justify-center w-full h-64 lg:h-1/2 bg-gray-400 dark:bg-gray-700 rounded-lg shadow-md">
             <ClipLoader color={loaderColor} size={50} />
-            <p className="text-gray-600 dark:text-gray-300">
+            <p className="text-gray-600 dark:text-gray-300 mt-2">
               Loading your stream...
             </p>
           </div>
         )}
-  
+
         {/* Remote Stream */}
         {remoteStream ? (
-          <div className="relative w-full h-1/2">
+          <div className="relative w-full h-64 lg:h-1/2">
             <ReactPlayer
-              className="absolute inset-0"
+              className="absolute inset-0 rounded-lg"
               url={remoteStream}
               playing
               muted={false}
               width="100%"
               height="100%"
             />
-            <div className="absolute bottom-0 left-0 bg-black bg-opacity-60 p-2 text-white text-sm rounded-tl-lg">
+            <div className="absolute bottom-0 left-0 bg-gradient-to-t from-black via-transparent to-transparent p-3 text-white text-sm rounded-tl-lg">
               Remote Stream
             </div>
           </div>
         ) : (
-          <div className="flex flex-col gap-4 items-center justify-center w-full h-1/2 bg-gray-300 dark:bg-gray-700 rounded-lg shadow-md">
+          <div className="flex flex-col items-center justify-center w-full h-64 lg:h-1/2 bg-gray-400 dark:bg-gray-700 rounded-lg shadow-md">
             <ClipLoader color={loaderColor} size={50} />
-            <p className="text-gray-600 dark:text-gray-300">
+            <p className="text-gray-600 dark:text-gray-300 mt-2">
               Waiting for user to connect...
             </p>
           </div>
         )}
       </div>
-  
+
       {/* Right Side */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col w-full">
         {/* Button Controls */}
-        <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex gap-4 h-16 bg-white dark:bg-gray-800 shadow">
+        <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex flex-row gap-4 h-auto sm:h-16 shadow rounded-lg bg-gray-50 dark:bg-gray-900">
           <Button
-            className="flex-1 max-lg:w-auto gap-2 bg-red-600 hover:bg-red-700 text-white transition-colors"
+            className="flex-1 p-2 gap-2 bg-red-600 text-white rounded-md"
+            size={"icon"}
             onClick={handleCleanup}
           >
             <StepBack size={18} />
-            Stop 
+            <span className="hidden sm:inline">Stop</span>
           </Button>
           <Button
-            className="flex-1 max-lg:w-auto gap-2 bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+            className={`flex-1 p-2 gap-2 bg-blue-600 text-white rounded-md ${
+              remoteSocketId === null ? "opacity-50 cursor-not-allowed" : ""
+            }`}
+            size={"icon"}
             onClick={handleSkip}
             disabled={remoteSocketId === null}
           >
-            Skip
             <StepForward size={18} />
+            <span className="hidden sm:inline">Skip</span>
           </Button>
           <Button
-            className="flex-1 max-lg:w-auto gap-2 bg-green-600 hover:bg-green-700 text-white transition-colors"
+            className="flex-1 p-2 gap-2 bg-green-600 text-white rounded-md"
             onClick={handleScreenShare}
+            size={"icon"}
           >
             <ScreenShare size={18} />
-            {isScreenSharing ? "Stop Sharing Screen" : "Share Screen"}
+            <span className="hidden sm:inline">
+              {isScreenSharing ? "Stop Sharing" : "Share Screen"}
+            </span>
           </Button>
         </div>
-  
+
         {/* Messages Area */}
         <div className="flex-1 max-h-[calc(100vh-128px)] overflow-auto p-4 bg-white dark:bg-gray-800 rounded-lg shadow-inner">
-          {screenStream ? 
+          {screenStream ? (
             <ReactPlayer
-              className="w-full h-full"
+              className="w-full h-full rounded-lg"
               url={screenStream}
               playing
-            /> : 
+              width="100%"
+              height="100%"
+            />
+          ) : (
             <Messages
               remoteSocketId={remoteSocketId}
               messagesArray={messagesArray}
               setMessagesArray={setMessagesArray}
             />
-          }
+          )}
         </div>
       </div>
     </div>
   );
-  
 }
