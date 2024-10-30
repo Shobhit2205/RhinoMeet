@@ -25,12 +25,39 @@ interface NegotiationDone {
   to: string;
 }
 
+const MicIcon = ({ isActive }: { isActive: boolean }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="48"
+    height="48"
+    className={isActive ? "fill-red-500" : "fill-white"}
+  >
+    <path d="M24 28c3.31 0 5.98-2.69 5.98-6L30 10c0-3.32-2.68-6-6-6-3.31 0-6 2.68-6 6v12c0 3.31 2.69 6 6 6zm10.6-6c0 6-5.07 10.2-10.6 10.2-5.52 0-10.6-4.2-10.6-10.2H10c0 6.83 5.44 12.47 12 13.44V42h4v-6.56c6.56-.97 12-6.61 12-13.44h-3.4z" />
+  </svg>
+);
+
+const VideoIcon = ({ isActive }: { isActive: boolean }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="48"
+    height="48"
+    viewBox="0 0 100 100"
+    className={isActive ? "fill-red-500" : "fill-white"}
+  >
+    <path d="M84.9 26.4L68 37.3V34c0-4.4-3.6-8-8-8H20c-4.4 0-8 3.6-8 8v32c0 4.4 3.6 8 8 8h40c4.4 0 8-3.6 8-8v-3.3l16.9 10.9c1.9 1 3.1-.7 3.1-1.7V28c0-1-1.1-2.8-3.1-1.6zM64 66c0 2.2-1.8 4-4 4H20c-2.2 0-4-1.8-4-4V34c0-2.2 1.8-4 4-4h40c2.2 0 4 1.8 4 4v32zm20 2.3L68 58V42l16-10.3v36.6z" />
+  </svg>
+);
+
 export default function VideoChat() {
   const { socket } = useSocket();
   const [remoteSocketId, setRemoteSocketId] = useState<string | null>(null);
   const [myStream, setMyStream] = useState<MediaStream | null>(null);
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
   const [screenStream, setScreenStream] = useState<MediaStream | null>(null);
+
+  const [isMicOn, setIsMicOn] = useState(true);
+  const [isVideoOn, setIsVideoOn] = useState(true);
+
   const [flag, setFlag] = useState(false);
   const [messagesArray, setMessagesArray] = useState<
     Array<{ sender: string; message: string }>
@@ -42,6 +69,9 @@ export default function VideoChat() {
 
   const loaderColor = theme.theme === "dark" ? "#D1D5DB" : "#4B5563";
 
+  const toggleMic = () => setIsMicOn((prev) => !prev);
+  const toggleVideo = () => setIsVideoOn((prev) => !prev);
+
   const getUserStream = useCallback(async () => {
     const stream = await navigator.mediaDevices.getUserMedia({
       video: true,
@@ -51,8 +81,8 @@ export default function VideoChat() {
         autoGainControl: true,
         sampleRate: 48000, // CD-quality audio sample rate
         sampleSize: 16, // Higher sample size
-        channelCount: 2 // Stereo audio
-      }
+        channelCount: 2, // Stereo audio
+      },
     });
     // const processedStream = processAudio(stream);
     setMyStream(stream);
@@ -111,7 +141,7 @@ export default function VideoChat() {
     } else {
       try {
         const stream = await navigator.mediaDevices.getDisplayMedia({
-          video: true
+          video: true,
         });
         setScreenStream(stream);
         setMyStream(stream);
@@ -145,7 +175,7 @@ export default function VideoChat() {
     if (sender) {
       const parameters = sender.getParameters();
       parameters.encodings[0] = {
-        maxBitrate: 128000 // Set a high bitrate for audio, 128 kbps
+        maxBitrate: 128000, // Set a high bitrate for audio, 128 kbps
       };
       sender.setParameters(parameters);
     }
@@ -213,14 +243,14 @@ export default function VideoChat() {
         // Create a new RTCSessionDescription with the modified SDP
         const modifiedOffer = new RTCSessionDescription({
           type: currentOffer.type,
-          sdp: modifiedSDP
+          sdp: modifiedSDP,
         });
 
         setAudioBandwidth(peerservice.peer);
 
         socket?.emit("peer:nego:needed", {
           offer: modifiedOffer,
-          to: remoteSocketId
+          to: remoteSocketId,
         });
 
         // console.log("Negotiation initiated with modified SDP.");
@@ -392,7 +422,7 @@ export default function VideoChat() {
         // console.log("Sending ICE candidate:", event.candidate);
         socket?.emit("ice-candidate", {
           candidate: event.candidate,
-          to: remoteSocketId
+          to: remoteSocketId,
         });
       }
     };
@@ -441,7 +471,7 @@ export default function VideoChat() {
     handleNegotiationIncomming,
     handleUserJoined,
     socket,
-    userDisConnected
+    userDisConnected,
   ]);
 
   const handleCleanup = useCallback(() => {
@@ -487,7 +517,7 @@ export default function VideoChat() {
       <div className="lg:w-[450px] w-full lg:h-[calc(100vh-64px)] h-auto border-b lg:border-b-0 lg:border-r border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-xl rounded-lg overflow-hidden">
         {/* My Stream */}
         {myStream ? (
-          <div className="relative w-full h-64 lg:h-1/2">
+          <div className="relative w-full h-64 lg:h-1/2 group">
             <ReactPlayer
               className="absolute inset-0 rounded-lg"
               url={myStream}
@@ -499,6 +529,26 @@ export default function VideoChat() {
             <div className="absolute bottom-0 left-0 bg-gradient-to-t from-black via-transparent to-transparent p-3 text-white text-sm rounded-tl-lg">
               My Stream
             </div>
+            {/* Mic and Video Toggle Controls (shown on hover) */}
+            <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 hidden group-hover:flex space-x-4 z-50">
+              <Button 
+                onClick={toggleMic}
+                aria-label={isMicOn ? "Turn microphone off" : "Turn microphone on"}
+                title={isMicOn ? "Turn microphone off" : "Turn microphone on"}
+                className="flex items-center justify-center w-15 h-15 bg-transparent hover:bg-transparent focus:outline-none"
+              >
+                <MicIcon isActive={!isMicOn} />
+              </Button>
+              <Button 
+                onClick={toggleVideo}
+                aria-label={isVideoOn ? "Turn video off" : "Turn video on"}
+                title={isVideoOn ? "Turn video off" : "Turn video on"}
+                className="flex items-center justify-center w-15 h-15 bg-transparent hover:bg-transparent focus:outline-none"
+              >
+                <VideoIcon isActive={!isVideoOn}/>
+              </Button>
+            </div>
+
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center w-full h-64 lg:h-1/2 bg-gray-400 dark:bg-gray-700 rounded-lg shadow-md">
