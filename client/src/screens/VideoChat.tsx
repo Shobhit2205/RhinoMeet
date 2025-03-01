@@ -36,6 +36,8 @@ export default function VideoChat() {
     Array<{ sender: string; message: string }>
   >([]);
   const [isScreenSharing, setIsScreenSharing] = useState(false);
+  const [isCameraOn, setIsCameraOn] = useState(true);
+  const [isMicOn, setIsMicOn] = useState(true);
 
   const theme = useTheme();
   const navigate = useNavigate();
@@ -61,6 +63,65 @@ export default function VideoChat() {
   useEffect(() => {
     getUserStream();
   }, [getUserStream, myStream]);
+
+  const toggleCamera = useCallback(() => {
+    if (myStream) {
+      const videoTrack = myStream.getVideoTracks()[0];
+      const sender = peerservice.peer
+        .getSenders()
+        .find((s) => s.track?.kind === "video");
+  
+      if (videoTrack && sender) {
+        if (isCameraOn) {
+          sender.replaceTrack(null); // Disable video by replacing with null
+          videoTrack.stop(); // Stop the track
+        } else {
+          navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
+            const newVideoTrack = stream.getVideoTracks()[0];
+            sender.replaceTrack(newVideoTrack); // Enable video by replacing track
+            setMyStream((prevStream) => {
+              if (prevStream) {
+                prevStream.removeTrack(videoTrack);
+                prevStream.addTrack(newVideoTrack);
+              }
+              return prevStream;
+            });
+          });
+        }
+        setIsCameraOn(!isCameraOn); // Update the camera state
+      }
+    }
+  }, [myStream, isCameraOn]);
+  
+  const toggleMic = useCallback(() => {
+    if (myStream) {
+      const audioTrack = myStream.getAudioTracks()[0];
+      const sender = peerservice.peer
+        .getSenders()
+        .find((s) => s.track?.kind === "audio");
+  
+      if (audioTrack && sender) {
+        if (isMicOn) {
+          sender.replaceTrack(null); // Disable audio by replacing with null
+          audioTrack.stop(); // Stop the track
+        } else {
+          navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+            const newAudioTrack = stream.getAudioTracks()[0];
+            sender.replaceTrack(newAudioTrack); // Enable audio by replacing track
+            setMyStream((prevStream) => {
+              if (prevStream) {
+                prevStream.removeTrack(audioTrack);
+                prevStream.addTrack(newAudioTrack);
+              }
+              return prevStream;
+            });
+          });
+        }
+        setIsMicOn(!isMicOn); // Update the mic state
+      }
+    }
+  }, [myStream, isMicOn]);
+  
 
   const sendStream = useCallback(() => {
     if (myStream) {
@@ -566,6 +627,12 @@ export default function VideoChat() {
             <span className="hidden sm:inline">
               {isScreenSharing ? "Stop Sharing" : "Share Screen"}
             </span>
+          </Button>
+          <Button className="flex-1 p-2 gap-2 bg-gray-600 text-white rounded-md" onClick={toggleCamera}>
+            <span>{isCameraOn ? "Turn Off Camera" : "Turn On Camera"}</span>
+          </Button>
+          <Button className="flex-1 p-2 gap-2 bg-gray-600 text-white rounded-md" onClick={toggleMic}>
+            <span>{isMicOn ? "Turn Off Mic" : "Turn On Mic"}</span>
           </Button>
         </div>
 

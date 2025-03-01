@@ -4,7 +4,7 @@ import { useSocket } from "../context/SocketProvider";
 import { io } from "socket.io-client";
 import { useNavigate } from "react-router-dom";
 import LogoContent from "../components/LogoContent";
-import { Github } from "lucide-react";
+// import { Github } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 
 export default function Home() {
@@ -86,7 +86,7 @@ export default function Home() {
               >
                 Start Your Journey
               </Button>
-              <a
+              {/* <a
                 href="https://github.com/Shobhit2205/RhinoMeet"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -99,7 +99,7 @@ export default function Home() {
                   <Github size={24} />
                   Contribute on GitHub
                 </Button>
-              </a>
+              </a> */}
             </div>
 
             <div className="text-xs sm:text-sm text-center mt-4 text-teal-100">
